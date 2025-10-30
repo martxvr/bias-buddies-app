@@ -10,11 +10,32 @@ interface BiasButtonProps {
 const BiasButton = ({ timeframe }: BiasButtonProps) => {
   const [bias, setBias] = useState<BiasState>("neutral");
 
+  const playSound = (nextState: BiasState) => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Verschillende frequenties per state
+    const frequency = nextState === "bullish" ? 800 : nextState === "bearish" ? 400 : 600;
+    oscillator.frequency.value = frequency;
+    oscillator.type = "sine";
+
+    // Subtiel volume met fade out
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  };
+
   const cycleState = () => {
     setBias((prev) => {
-      if (prev === "neutral") return "bullish";
-      if (prev === "bullish") return "bearish";
-      return "neutral";
+      const nextState = prev === "neutral" ? "bullish" : prev === "bullish" ? "bearish" : "neutral";
+      playSound(nextState);
+      return nextState;
     });
   };
 
