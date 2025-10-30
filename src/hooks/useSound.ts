@@ -1,4 +1,5 @@
 let sharedAudioContext: AudioContext | null = null;
+let globalMuted = false;
 
 function getAudioContext(): AudioContext | null {
   try {
@@ -15,6 +16,7 @@ function getAudioContext(): AudioContext | null {
 
 export function useClickSound() {
   const playClick = () => {
+    if (globalMuted) return;
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -45,6 +47,27 @@ export function useClickSound() {
   };
 
   return { playClick };
+}
+
+export function setMuted(muted: boolean) {
+  globalMuted = muted;
+  try {
+    window.localStorage.setItem("app-muted", muted ? "1" : "0");
+    window.dispatchEvent(new CustomEvent("app:muteChanged", { detail: { muted } }));
+  } catch {}
+}
+
+export function getMuted() {
+  return globalMuted;
+}
+
+export function initMuteFromStorage() {
+  try {
+    const v = window.localStorage.getItem("app-muted");
+    globalMuted = v === "1";
+  } catch {
+    globalMuted = false;
+  }
 }
 
 

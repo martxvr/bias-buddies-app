@@ -1,5 +1,6 @@
 import BiasButton from "@/components/BiasButton";
 import { useMemo, useState } from "react";
+import MuteToggle from "@/components/MuteToggle";
 
 const Index = () => {
   const timeframes = ["1D", "4H", "1H", "15M", "5M"];
@@ -26,6 +27,7 @@ const Index = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-5xl">
+        <MuteToggle />
         <div className="mb-12 text-center">
           <h1 className="mb-2 text-4xl font-bold text-foreground">
             Trading Bias Tracker
