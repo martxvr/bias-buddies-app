@@ -9,26 +9,32 @@ interface BiasButtonProps {
 
 const BiasButton = ({ timeframe }: BiasButtonProps) => {
   const [bias, setBias] = useState<BiasState>("neutral");
+  
+  console.log("BiasButton rendering for timeframe:", timeframe);
 
   const playSound = (nextState: BiasState) => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-    // Verschillende frequenties per state
-    const frequency = nextState === "bullish" ? 800 : nextState === "bearish" ? 400 : 600;
-    oscillator.frequency.value = frequency;
-    oscillator.type = "sine";
+      // Verschillende frequenties per state
+      const frequency = nextState === "bullish" ? 800 : nextState === "bearish" ? 400 : 600;
+      oscillator.frequency.value = frequency;
+      oscillator.type = "sine";
 
-    // Subtiel volume met fade out
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      // Subtiel volume met fade out
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+      console.log("Audio playback failed:", error);
+    }
   };
 
   const cycleState = () => {
