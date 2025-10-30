@@ -1,25 +1,26 @@
-import { useState } from "react";
+import { useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { useClickSound } from "@/hooks/useSound";
 
 type BiasState = "neutral" | "bullish" | "bearish";
 
 interface BiasButtonProps {
   timeframe: string;
+  value: BiasState;
+  onChange: (next: BiasState) => void;
 }
 
-const BiasButton = ({ timeframe }: BiasButtonProps) => {
-  const [bias, setBias] = useState<BiasState>("neutral");
+const BiasButton = ({ timeframe, value, onChange }: BiasButtonProps) => {
+  const { playClick } = useClickSound();
 
-  const cycleState = () => {
-    setBias((prev) => {
-      if (prev === "neutral") return "bullish";
-      if (prev === "bullish") return "bearish";
-      return "neutral";
-    });
-  };
+  const cycleState = useCallback(() => {
+    const next = value === "neutral" ? "bullish" : value === "bullish" ? "bearish" : "neutral";
+    onChange(next);
+    playClick();
+  }, [value, onChange, playClick]);
 
   const getStateStyles = () => {
-    switch (bias) {
+    switch (value) {
       case "bullish":
         return "bg-bullish hover:bg-bullish-hover text-bullish-foreground border-bullish";
       case "bearish":
@@ -30,7 +31,7 @@ const BiasButton = ({ timeframe }: BiasButtonProps) => {
   };
 
   const getStateLabel = () => {
-    switch (bias) {
+    switch (value) {
       case "bullish":
         return "BULLISH";
       case "bearish":
