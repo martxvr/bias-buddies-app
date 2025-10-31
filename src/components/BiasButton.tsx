@@ -16,7 +16,7 @@ const BiasButton = ({ timeframe, value, onChange }: BiasButtonProps) => {
   const cycleState = useCallback(() => {
     const next = value === "neutral" ? "bullish" : value === "bullish" ? "bearish" : "neutral";
     onChange(next);
-    playClick();
+    playClick(next);
   }, [value, onChange, playClick]);
 
   const getStateStyles = () => {

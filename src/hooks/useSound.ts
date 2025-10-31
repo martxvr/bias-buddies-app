@@ -15,7 +15,8 @@ function getAudioContext(): AudioContext | null {
 }
 
 export function useClickSound() {
-  const playClick = () => {
+  type BiasState = "neutral" | "bullish" | "bearish";
+  const playClick = (bias?: BiasState) => {
     if (globalMuted) return;
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -25,19 +26,20 @@ export function useClickSound() {
       ctx.resume().catch(() => {});
     }
 
-    const duration = 0.05; // 50ms
+    const duration = 0.1; // 100ms
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    // Subtle tick: short envelope and modest volume
-    gain.gain.setValueAtTime(0.06, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    // Subtiele envelope en volume
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-    // Soft high-ish frequency blip
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(2200, now);
+    // Toon per bias (sine, smooth)
+    const freq = bias === "bullish" ? 600 : bias === "bearish" ? 300 : 400;
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, now);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
