@@ -24,6 +24,10 @@ const Index = () => {
     return { counts, overall };
   }, [biasByTimeframe]);
 
+  const handleReset = () => {
+    setBiasByTimeframe(Object.fromEntries(timeframes.map((tf) => [tf, "neutral"])) as Record<string, BiasState>);
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-5xl">
@@ -85,6 +89,14 @@ const Index = () => {
           </div>
         </div>
       </div>
+      {/* Floating, mobile-friendly Reset button */}
+      <button
+        aria-label="Reset biases to neutral"
+        onClick={handleReset}
+        className="fixed bottom-4 right-4 z-50 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+      >
+        Reset
+      </button>
     </div>
   );
 };
