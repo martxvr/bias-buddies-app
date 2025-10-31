@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, X, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { getMuted } from "@/hooks/useSound";
 
 interface ChecklistItem {
   id: string;
@@ -28,10 +29,33 @@ interface ChecklistDrawerProps {
 const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
   const [checklist, setChecklist] = useState<ChecklistItem[]>(initialChecklist);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCompletion, setShowCompletion] = useState(false);
 
   const currentItem = checklist[currentIndex];
   const progress = ((currentIndex + 1) / checklist.length) * 100;
   const allChecked = checklist.every(item => item.checked);
+
+  // Play success sound when all checked
+  useEffect(() => {
+    if (allChecked && !showCompletion && !getMuted()) {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Success chord: C-E-G
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+
+      setTimeout(() => setShowCompletion(true), 400);
+    }
+  }, [allChecked, showCompletion]);
 
   const handleAnswer = (answer: boolean) => {
     const updated = [...checklist];
@@ -59,6 +83,7 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
   const handleReset = () => {
     setChecklist(initialChecklist);
     setCurrentIndex(0);
+    setShowCompletion(false);
   };
 
   if (!isOpen) return null;
@@ -87,71 +112,102 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
           </p>
         </div>
 
-        {/* Question */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
-          <div className="w-full max-w-sm space-y-8 animate-in fade-in duration-300">
-            <div className="text-center space-y-4">
-              <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                {String(currentIndex + 1).padStart(2, '0')}
-              </span>
-              <h3 className="text-2xl font-medium text-foreground leading-relaxed">
-                {currentItem.question}
-              </h3>
-            </div>
+        {/* Question or Completion */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
+          {showCompletion ? (
+            <div className="w-full max-w-md space-y-6 animate-in fade-in duration-500">
+              {/* Congratulations Header */}
+              <div className="text-center space-y-4 pb-6 border-b border-border">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 animate-scale-in">
+                  <TrendingUp className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-2xl font-semibold text-foreground">
+                  Ready to Trade!
+                </h3>
+                <p className="text-muted-foreground">
+                  All criteria met - you can place your position
+                </p>
+              </div>
 
-            <div className="flex gap-4 justify-center">
-              <Button
-                size="lg"
-                variant={currentItem.checked === false ? "default" : "outline"}
-                onClick={() => handleAnswer(false)}
-                className="min-w-[120px] gap-2"
-              >
-                <X className="h-5 w-5" />
-                No
-              </Button>
-              <Button
-                size="lg"
-                variant={currentItem.checked === true ? "default" : "outline"}
-                onClick={() => handleAnswer(true)}
-                className="min-w-[120px] gap-2"
-              >
-                <Check className="h-5 w-5" />
-                Yes
-              </Button>
+              {/* All Questions with Checkmarks */}
+              <div className="space-y-3">
+                {checklist.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 animate-in fade-in duration-300"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      </div>
+                    </div>
+                    <p className="text-sm text-foreground flex-1 leading-relaxed">
+                      {item.question}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="w-full max-w-sm space-y-8 animate-in fade-in duration-300">
+              <div className="text-center space-y-4">
+                <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                  {String(currentIndex + 1).padStart(2, '0')}
+                </span>
+                <h3 className="text-2xl font-medium text-foreground leading-relaxed">
+                  {currentItem.question}
+                </h3>
+              </div>
+
+              <div className="flex gap-4 justify-center">
+                <Button
+                  size="lg"
+                  variant={currentItem.checked === false ? "default" : "outline"}
+                  onClick={() => handleAnswer(false)}
+                  className="min-w-[120px] gap-2"
+                >
+                  <X className="h-5 w-5" />
+                  No
+                </Button>
+                <Button
+                  size="lg"
+                  variant={currentItem.checked === true ? "default" : "outline"}
+                  onClick={() => handleAnswer(true)}
+                  className="min-w-[120px] gap-2"
+                >
+                  <Check className="h-5 w-5" />
+                  Yes
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation & Status */}
         <div className="p-6 border-t border-border space-y-4">
-          <div className="flex justify-between items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-              className="gap-2"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleNext}
-              disabled={currentIndex === checklist.length - 1}
-              className="gap-2"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {allChecked && (
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center animate-in fade-in duration-300">
-              <p className="text-sm font-medium text-primary">
-                ✓ All criteria met - Ready to execute trade
-              </p>
+          {!showCompletion && (
+            <div className="flex justify-between items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
+                className="gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNext}
+                disabled={currentIndex === checklist.length - 1}
+                className="gap-2"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           )}
 
