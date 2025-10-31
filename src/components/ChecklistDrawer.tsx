@@ -34,6 +34,7 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
   const currentItem = checklist[currentIndex];
   const progress = ((currentIndex + 1) / checklist.length) * 100;
   const allChecked = checklist.every(item => item.checked);
+  const hasNoAnswers = checklist.some(item => item.checked === false);
 
   const playSound = (frequency: number) => {
     if (getMuted()) return;
@@ -126,20 +127,36 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
         <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
           {showCompletion ? (
             <div className="w-full max-w-md space-y-6 animate-in fade-in duration-500">
-              {/* Congratulations Header */}
+              {/* Congratulations or Warning Header */}
               <div className="text-center space-y-4 pb-6 border-b border-border">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 animate-scale-in">
-                  <TrendingUp className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-2xl font-semibold text-foreground">
-                  Ready to Trade!
-                </h3>
-                <p className="text-muted-foreground">
-                  All criteria met - you can place your position
-                </p>
+                {hasNoAnswers ? (
+                  <>
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 animate-scale-in">
+                      <X className="h-8 w-8 text-destructive" />
+                    </div>
+                    <h3 className="text-2xl font-semibold text-foreground">
+                      Cannot Take Trade
+                    </h3>
+                    <p className="text-muted-foreground">
+                      One or more criteria not met - this is highly probable to be a losing trade
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 animate-scale-in">
+                      <TrendingUp className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-semibold text-foreground">
+                      Ready to Trade!
+                    </h3>
+                    <p className="text-muted-foreground">
+                      All criteria met - you can place your position
+                    </p>
+                  </>
+                )}
               </div>
 
-              {/* All Questions with Checkmarks */}
+              {/* All Questions with Checkmarks or X marks */}
               <div className="space-y-3">
                 {checklist.map((item, index) => (
                   <div
@@ -148,9 +165,15 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex-shrink-0 mt-0.5">
-                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="h-3 w-3 text-primary-foreground" />
-                      </div>
+                      {item.checked ? (
+                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
+                          <X className="h-3 w-3 text-destructive-foreground" />
+                        </div>
+                      )}
                     </div>
                     <p className="text-sm text-foreground flex-1 leading-relaxed">
                       {item.question}
