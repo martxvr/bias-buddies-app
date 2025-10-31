@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Check, X, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -35,9 +35,10 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
   const progress = ((currentIndex + 1) / checklist.length) * 100;
   const allChecked = checklist.every(item => item.checked);
 
-  // Play success sound when all checked
-  useEffect(() => {
-    if (allChecked && !showCompletion && !getMuted()) {
+  const playSound = (frequency: number) => {
+    if (getMuted()) return;
+    
+    try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -45,22 +46,31 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
-      // Success chord: C-E-G
-      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
       gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
       
       oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
-
-      setTimeout(() => setShowCompletion(true), 400);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+      console.error('Audio error:', e);
     }
-  }, [allChecked, showCompletion]);
+  };
 
   const handleAnswer = (answer: boolean) => {
+    // Play sound: bullish (600Hz) for Yes, bearish (300Hz) for No
+    playSound(answer ? 600 : 300);
+    
     const updated = [...checklist];
     updated[currentIndex].checked = answer;
     setChecklist(updated);
+
+    // Check if all are checked after this update
+    const allDone = updated.every(item => item.checked);
+    if (allDone) {
+      setTimeout(() => setShowCompletion(true), 400);
+    }
 
     // Auto-advance to next question if not last
     if (currentIndex < checklist.length - 1) {
