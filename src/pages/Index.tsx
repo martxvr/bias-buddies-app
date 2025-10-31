@@ -1,6 +1,8 @@
 import BiasButton from "@/components/BiasButton";
 import { useMemo, useState } from "react";
 import MuteToggle from "@/components/MuteToggle";
+import ChecklistDrawer from "@/components/ChecklistDrawer";
+import { ClipboardCheck } from "lucide-react";
 
 const Index = () => {
   const timeframes = ["1D", "4H", "1H", "15M", "5M"];
@@ -23,6 +25,8 @@ const Index = () => {
     const overall: BiasState = topCount === secondCount ? "neutral" : topBias;
     return { counts, overall };
   }, [biasByTimeframe]);
+
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
 
   const handleReset = () => {
     setBiasByTimeframe(Object.fromEntries(timeframes.map((tf) => [tf, "neutral"])) as Record<string, BiasState>);
@@ -89,14 +93,25 @@ const Index = () => {
           </div>
         </div>
       </div>
-      {/* Floating, mobile-friendly Reset button */}
-      <button
-        aria-label="Reset biases to neutral"
-        onClick={handleReset}
-        className="fixed bottom-4 right-4 z-50 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
-      >
-        Reset
-      </button>
+      {/* Floating action buttons */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        <button
+          aria-label="Open trade checklist"
+          onClick={() => setIsChecklistOpen(true)}
+          className="rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+        >
+          <ClipboardCheck className="h-5 w-5" />
+        </button>
+        <button
+          aria-label="Reset biases to neutral"
+          onClick={handleReset}
+          className="rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+        >
+          Reset
+        </button>
+      </div>
+
+      <ChecklistDrawer isOpen={isChecklistOpen} onClose={() => setIsChecklistOpen(false)} />
     </div>
   );
 };
