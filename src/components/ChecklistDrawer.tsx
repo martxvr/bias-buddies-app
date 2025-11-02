@@ -7,18 +7,18 @@ import { getMuted } from "@/hooks/useSound";
 interface ChecklistItem {
   id: string;
   question: string;
-  checked: boolean;
+  checked: boolean | null; // null = not answered, true = yes, false = no
 }
 
 const initialChecklist: ChecklistItem[] = [
-  { id: "htf-bias", question: "Following HTF Bias (via tradebiasapp.com)?", checked: false },
-  { id: "sweep", question: "Sweep of Liquidity?", checked: false },
-  { id: "fvg", question: "Fair Value Gap (FVG on both NQ & ES)?", checked: false },
-  { id: "breaker", question: "Breaker Block (BB) or Mitigation Block (MB) paired with FVG on either NQ or ES?", checked: false },
-  { id: "ssl-bsl", question: "Buy at SSL, Sell at BSL?", checked: false },
-  { id: "displacement", question: "Displacement on both NQ & ES (MSS)?", checked: false },
-  { id: "objective", question: "First Objective has not been met?", checked: false },
-  { id: "macro", question: "Inside Macro (09:45-10:15, 10:45-11:15, 11:45-12:15)?", checked: false },
+  { id: "htf-bias", question: "Following HTF Bias (via tradebiasapp.com)?", checked: null },
+  { id: "sweep", question: "Sweep of Liquidity?", checked: null },
+  { id: "fvg", question: "Fair Value Gap (FVG on both NQ & ES)?", checked: null },
+  { id: "breaker", question: "Breaker Block (BB) or Mitigation Block (MB) paired with FVG on either NQ or ES?", checked: null },
+  { id: "ssl-bsl", question: "Buy at SSL, Sell at BSL?", checked: null },
+  { id: "displacement", question: "Displacement on both NQ & ES (MSS)?", checked: null },
+  { id: "objective", question: "First Objective has not been met?", checked: null },
+  { id: "macro", question: "Inside Macro (09:45-10:15, 10:45-11:15, 11:45-12:15)?", checked: null },
 ];
 
 interface ChecklistDrawerProps {
@@ -33,7 +33,7 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
 
   const currentItem = checklist[currentIndex];
   const progress = ((currentIndex + 1) / checklist.length) * 100;
-  const allChecked = checklist.every(item => item.checked);
+  const allAnswered = checklist.every(item => item.checked !== null);
   const hasNoAnswers = checklist.some(item => item.checked === false);
 
   const playSound = (frequency: number) => {
@@ -67,15 +67,15 @@ const ChecklistDrawer = ({ isOpen, onClose }: ChecklistDrawerProps) => {
     updated[currentIndex].checked = answer;
     setChecklist(updated);
 
-    // Check if all are checked after this update
-    const allDone = updated.every(item => item.checked);
-    if (allDone) {
-      setTimeout(() => setShowCompletion(true), 400);
-    }
-
+    // Check if all are answered after this update
+    const allAnswered = updated.every(item => item.checked !== null);
+    
     // Auto-advance to next question if not last
     if (currentIndex < checklist.length - 1) {
       setTimeout(() => setCurrentIndex(currentIndex + 1), 300);
+    } else if (allAnswered) {
+      // If this is the last question and all are answered, show completion
+      setTimeout(() => setShowCompletion(true), 400);
     }
   };
 
