@@ -11,7 +11,7 @@ interface ChecklistItem {
 }
 
 const initialChecklist: ChecklistItem[] = [
-  { id: "htf-bias", question: "Following HTF Bias (via tradebiasapp.com)?", checked: null },
+  { id: "htf-bias", question: "Following HTF Bias?", checked: null },
   { id: "sweep", question: "Sweep of Liquidity?", checked: null },
   { id: "fvg", question: "Fair Value Gap (FVG on both NQ & ES)?", checked: null },
   { id: "breaker", question: "Breaker Block (BB) or Mitigation Block (MB) paired with FVG on either NQ or ES?", checked: null },
