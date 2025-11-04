@@ -3,8 +3,16 @@ import { useMemo, useState } from "react";
 import MuteToggle from "@/components/MuteToggle";
 import ChecklistDrawer from "@/components/ChecklistDrawer";
 import { ClipboardCheck } from "lucide-react";
+import { RoomsButton } from "@/components/RoomsButton";
+import { CreateRoomDialog } from "@/components/CreateRoomDialog";
+import { JoinRoomDialog } from "@/components/JoinRoomDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const timeframes = ["1D", "4H", "1H", "15M", "5M"];
 
   type BiasState = "neutral" | "bullish" | "bearish";
@@ -12,6 +20,25 @@ const Index = () => {
     () => Object.fromEntries(timeframes.map((tf) => [tf, "neutral"]))
   );
 
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
+  const [createRoomOpen, setCreateRoomOpen] = useState(false);
+  const [joinRoomOpen, setJoinRoomOpen] = useState(false);
+
+  const handleCreateRoom = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setCreateRoomOpen(true);
+  };
+
+  const handleJoinRoom = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setJoinRoomOpen(true);
+  };
   const { counts, overall }: { counts: Record<BiasState, number>; overall: BiasState } = useMemo(() => {
     const counts: Record<BiasState, number> = { bullish: 0, bearish: 0, neutral: 0 };
     Object.values(biasByTimeframe).forEach((b) => {
@@ -26,14 +53,26 @@ const Index = () => {
     return { counts, overall };
   }, [biasByTimeframe]);
 
-  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
-
   const handleReset = () => {
     setBiasByTimeframe(Object.fromEntries(timeframes.map((tf) => [tf, "neutral"])) as Record<string, BiasState>);
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <RoomsButton onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} />
+      
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        {user ? (
+          <Button variant="ghost" size="sm" onClick={signOut}>
+            Logout
+          </Button>
+        ) : (
+          <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+            Login
+          </Button>
+        )}
+      </div>
+
       <div className="w-full max-w-5xl">
         <MuteToggle />
         <div className="mb-12 text-center">
@@ -110,6 +149,8 @@ const Index = () => {
       </button>
 
       <ChecklistDrawer isOpen={isChecklistOpen} onClose={() => setIsChecklistOpen(false)} />
+      <CreateRoomDialog open={createRoomOpen} onOpenChange={setCreateRoomOpen} />
+      <JoinRoomDialog open={joinRoomOpen} onOpenChange={setJoinRoomOpen} />
     </div>
   );
 };
