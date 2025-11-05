@@ -158,16 +158,6 @@ const Room = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute top-4 left-4"
-        onClick={() => navigate("/")}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back
-      </Button>
-
       <div className="w-full max-w-5xl">
         <MuteToggle />
         <div className="mb-12 text-center">
