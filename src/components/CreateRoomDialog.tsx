@@ -46,9 +46,9 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       if (error) throw error;
 
       toast.success("Room created!");
-      onOpenChange(false);
       setRoomName("");
-      navigate(`/room/${room.id}`);
+      onOpenChange(false);
+      setTimeout(() => navigate(`/room/${room.id}`), 100);
     } catch (error: any) {
       toast.error(error.message || "Failed to create room");
     } finally {

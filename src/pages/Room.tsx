@@ -28,8 +28,12 @@ const Room = () => {
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    if (!user || !roomId) {
-      navigate("/auth");
+    if (!roomId) {
+      navigate("/");
+      return;
+    }
+
+    if (!user) {
       return;
     }
 

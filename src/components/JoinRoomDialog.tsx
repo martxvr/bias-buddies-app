@@ -61,9 +61,9 @@ export function JoinRoomDialog({ open, onOpenChange }: JoinRoomDialogProps) {
         toast.success("Joined room!");
       }
 
-      onOpenChange(false);
       setInviteCode("");
-      navigate(`/room/${room.id}`);
+      onOpenChange(false);
+      setTimeout(() => navigate(`/room/${room.id}`), 100);
     } catch (error: any) {
       toast.error(error.message || "Failed to join room");
     } finally {
