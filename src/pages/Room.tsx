@@ -230,11 +230,11 @@ const Room = () => {
         </div>
       </div>
 
-      {/* Floating action buttons */}
+      {/* Floating action buttons - always visible outside sidebar */}
       <button
         aria-label="Open trade checklist"
         onClick={() => setIsChecklistOpen(true)}
-        className="fixed bottom-4 left-4 z-50 rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+        className="fixed bottom-4 left-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
       >
         <ClipboardCheck className="h-5 w-5" />
       </button>
@@ -242,7 +242,7 @@ const Room = () => {
         <button
           aria-label="Reset biases to neutral"
           onClick={handleReset}
-          className="fixed bottom-4 right-4 z-50 rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+          className="fixed bottom-4 right-4 z-[100] rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
         >
           Reset
         </button>
