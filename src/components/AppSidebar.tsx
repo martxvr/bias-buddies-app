@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Home, Plus, LogIn, LogOut, Settings, Trash2 } from "lucide-react";
+import { User, Home, Plus, LogIn, LogOut, Settings, Trash2, FolderKanban } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -149,14 +149,24 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 {user && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                    <NavLink to="/profile">
-                      <User className="h-4 w-4" />
-                      {!isCollapsed && <span>Profiel</span>}
-                    </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <NavLink to="/profile">
+                          <User className="h-4 w-4" />
+                          {!isCollapsed && <span>Profiel</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <NavLink to="/rooms">
+                          <FolderKanban className="h-4 w-4" />
+                          {!isCollapsed && <span>Room Beheer</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </>
                 )}
               </SidebarMenu>
             </SidebarGroupContent>

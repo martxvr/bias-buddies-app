@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -8,15 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) {
@@ -33,12 +36,51 @@ const Profile = () => {
 
       if (profile) {
         setUsername(profile.username || "");
+        setAvatarUrl(profile.avatar_url || "");
       }
       setEmail(user.email || "");
     };
 
     loadProfile();
   }, [user, navigate]);
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files || event.target.files.length === 0) return;
+    
+    const file = event.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+
+    setUploading(true);
+    try {
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with avatar URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
+      toast.success("Avatar geüpload!");
+    } catch (error: any) {
+      toast.error(error.message || "Fout bij uploaden avatar");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleUpdateProfile = async () => {
     if (!user) return;
@@ -51,9 +93,9 @@ const Profile = () => {
         .eq("id", user.id);
 
       if (error) throw error;
-      toast.success("Profile updated successfully!");
+      toast.success("Profiel bijgewerkt!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+      toast.error(error.message || "Fout bij bijwerken profiel");
     } finally {
       setLoading(false);
     }
@@ -61,7 +103,7 @@ const Profile = () => {
 
   const handleUpdatePassword = async () => {
     if (!newPassword) {
-      toast.error("Please enter a new password");
+      toast.error("Voer een nieuw wachtwoord in");
       return;
     }
 
@@ -72,10 +114,10 @@ const Profile = () => {
       });
 
       if (error) throw error;
-      toast.success("Password updated successfully!");
+      toast.success("Wachtwoord bijgewerkt!");
       setNewPassword("");
     } catch (error: any) {
-      toast.error(error.message || "Failed to update password");
+      toast.error(error.message || "Fout bij bijwerken wachtwoord");
     } finally {
       setLoading(false);
     }
@@ -87,19 +129,28 @@ const Profile = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Profile Settings</h1>
-          <p className="text-muted-foreground">Manage your account information</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Profiel Instellingen</h1>
+          <p className="text-muted-foreground">Beheer je account informatie</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>Update your profile details</CardDescription>
+            <CardTitle>Profiel Informatie</CardTitle>
+            <CardDescription>Werk je profiel gegevens bij</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex justify-center">
               <div className="relative">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                  disabled={uploading}
+                />
                 <Avatar className="h-24 w-24">
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
                   <AvatarFallback>
                     {username?.[0]?.toUpperCase() || email?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
@@ -108,9 +159,14 @@ const Profile = () => {
                   size="icon"
                   variant="secondary"
                   className="absolute bottom-0 right-0 rounded-full h-8 w-8"
-                  onClick={() => toast.info("Avatar upload coming soon!")}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
                 >
-                  <Camera className="h-4 w-4" />
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -118,44 +174,44 @@ const Profile = () => {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" value={email} disabled />
-              <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+              <p className="text-xs text-muted-foreground">Email kan niet worden gewijzigd</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Gebruikersnaam</Label>
               <Input
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Voer je gebruikersnaam in"
               />
             </div>
 
             <Button onClick={handleUpdateProfile} disabled={loading} className="w-full">
-              {loading ? "Updating..." : "Update Profile"}
+              {loading ? "Bijwerken..." : "Profiel Bijwerken"}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-            <CardDescription>Update your account password</CardDescription>
+            <CardTitle>Wachtwoord Wijzigen</CardTitle>
+            <CardDescription>Wijzig je account wachtwoord</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">Nieuw Wachtwoord</Label>
               <Input
                 id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder="Voer nieuw wachtwoord in"
               />
             </div>
 
             <Button onClick={handleUpdatePassword} disabled={loading} className="w-full">
-              {loading ? "Updating..." : "Update Password"}
+              {loading ? "Bijwerken..." : "Wachtwoord Bijwerken"}
             </Button>
           </CardContent>
         </Card>

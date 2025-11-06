@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BiasVoting } from "@/components/BiasVoting";
+import { OnlineStatus } from "@/components/OnlineStatus";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -159,7 +160,10 @@ const Room = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-5xl">
-        <MuteToggle />
+        <div className="mb-6 flex items-center justify-between">
+          <MuteToggle />
+          <OnlineStatus roomId={roomId!} />
+        </div>
         <div className="mb-12 text-center">
           <h1 className="mb-2 text-4xl font-bold text-foreground">
             {roomName}
@@ -231,22 +235,22 @@ const Room = () => {
       </div>
 
       {/* Floating action buttons - always visible outside sidebar */}
+      <button
+        aria-label="Open trade checklist"
+        onClick={() => setIsChecklistOpen(true)}
+        className="fixed bottom-4 right-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+      >
+        <ClipboardCheck className="h-5 w-5" />
+      </button>
       {isOwner && (
         <button
           aria-label="Reset biases to neutral"
           onClick={handleReset}
-          className="fixed bottom-4 right-4 z-[100] rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+          className="fixed bottom-20 right-4 z-[100] rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
         >
           Reset
         </button>
       )}
-      <button
-        aria-label="Open trade checklist"
-        onClick={() => setIsChecklistOpen(true)}
-        className="fixed bottom-16 right-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
-      >
-        <ClipboardCheck className="h-5 w-5" />
-      </button>
 
       <ChecklistDrawer isOpen={isChecklistOpen} onClose={() => setIsChecklistOpen(false)} />
     </div>
