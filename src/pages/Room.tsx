@@ -128,7 +128,7 @@ const Room = () => {
 
   const handleReset = async () => {
     if (!isOwner) {
-      toast.error("Only the room owner can reset bias");
+      toast.error("Alleen de room eigenaar kan de bias resetten");
       return;
     }
 
@@ -141,9 +141,9 @@ const Room = () => {
           updated_by: user?.id,
         });
       }
-      toast.success("Reset to neutral");
+      toast.success("Gereset naar neutraal");
     } catch (error: any) {
-      toast.error(error.message || "Failed to reset");
+      toast.error(error.message || "Fout bij resetten");
     }
   };
 
@@ -231,13 +231,6 @@ const Room = () => {
       </div>
 
       {/* Floating action buttons - always visible outside sidebar */}
-      <button
-        aria-label="Open trade checklist"
-        onClick={() => setIsChecklistOpen(true)}
-        className="fixed bottom-4 left-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
-      >
-        <ClipboardCheck className="h-5 w-5" />
-      </button>
       {isOwner && (
         <button
           aria-label="Reset biases to neutral"
@@ -247,6 +240,13 @@ const Room = () => {
           Reset
         </button>
       )}
+      <button
+        aria-label="Open trade checklist"
+        onClick={() => setIsChecklistOpen(true)}
+        className="fixed bottom-16 right-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+      >
+        <ClipboardCheck className="h-5 w-5" />
+      </button>
 
       <ChecklistDrawer isOpen={isChecklistOpen} onClose={() => setIsChecklistOpen(false)} />
     </div>

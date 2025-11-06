@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
-import { User, Home, Plus, LogIn, LogOut, Settings } from "lucide-react";
+import { User, Home, Plus, LogIn, LogOut, Settings, Trash2 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +44,7 @@ export function AppSidebar() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [joinRoomOpen, setJoinRoomOpen] = useState(false);
+  const [deleteRoomId, setDeleteRoomId] = useState<string | null>(null);
   const isCollapsed = state === "collapsed";
 
   useEffect(() => {
@@ -80,12 +92,52 @@ export function AppSidebar() {
     setJoinRoomOpen(true);
   };
 
+  const handleDeleteRoom = async (roomId: string) => {
+    try {
+      const { error } = await supabase
+        .from("rooms")
+        .delete()
+        .eq("id", roomId);
+
+      if (error) throw error;
+
+      toast.success("Room verwijderd");
+      setDeleteRoomId(null);
+      
+      // Refresh rooms
+      if (user) {
+        const { data: ownedRooms } = await supabase
+          .from("rooms")
+          .select("*")
+          .eq("owner_id", user.id);
+
+        const { data: memberRooms } = await supabase
+          .from("room_members")
+          .select("room_id, rooms(*)")
+          .eq("user_id", user.id);
+
+        const allRooms = [
+          ...(ownedRooms || []),
+          ...(memberRooms?.map((m: any) => m.rooms).filter(Boolean) || []),
+        ];
+
+        const uniqueRooms = Array.from(
+          new Map(allRooms.map((room) => [room.id, room])).values()
+        );
+
+        setRooms(uniqueRooms);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Fout bij verwijderen room");
+    }
+  };
+
   return (
     <>
       <Sidebar className={isCollapsed ? "w-14" : "w-64"}>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupLabel>Navigatie</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -101,7 +153,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                     <NavLink to="/profile">
                       <User className="h-4 w-4" />
-                      {!isCollapsed && <span>Profile</span>}
+                      {!isCollapsed && <span>Profiel</span>}
                     </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -114,16 +166,30 @@ export function AppSidebar() {
             <>
               <Separator className="my-2" />
               <SidebarGroup>
-                <SidebarGroupLabel>Rooms</SidebarGroupLabel>
+                <SidebarGroupLabel>Mijn Rooms ({rooms.length})</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {rooms.map((room) => (
                       <SidebarMenuItem key={room.id}>
-                        <SidebarMenuButton asChild>
-                        <NavLink to={`/room/${room.id}`}>
-                          <Settings className="h-4 w-4" />
-                          {!isCollapsed && <span>{room.name}</span>}
-                        </NavLink>
+                        <SidebarMenuButton asChild className="justify-between group">
+                          <div className="flex items-center w-full">
+                            <NavLink to={`/room/${room.id}`} className="flex items-center gap-2 flex-1">
+                              <Settings className="h-4 w-4" />
+                              {!isCollapsed && <span>{room.name}</span>}
+                            </NavLink>
+                            {!isCollapsed && room.owner_id === user?.id && (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setDeleteRoomId(room.id);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded transition-opacity"
+                                aria-label="Verwijder room"
+                              >
+                                <Trash2 className="h-3 w-3 text-destructive" />
+                              </button>
+                            )}
+                          </div>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
@@ -137,7 +203,7 @@ export function AppSidebar() {
                         onClick={handleCreateRoom}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Create Room
+                        Maak Room
                       </Button>
                       <Button
                         variant="outline"
@@ -162,7 +228,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={signOut}>
                   <LogOut className="h-4 w-4" />
-                  {!isCollapsed && <span>Logout</span>}
+                  {!isCollapsed && <span>Uitloggen</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -171,7 +237,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => navigate("/auth")}>
                   <LogIn className="h-4 w-4" />
-                  {!isCollapsed && <span>Login</span>}
+                  {!isCollapsed && <span>Inloggen</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -181,6 +247,26 @@ export function AppSidebar() {
 
       <CreateRoomDialog open={createRoomOpen} onOpenChange={setCreateRoomOpen} />
       <JoinRoomDialog open={joinRoomOpen} onOpenChange={setJoinRoomOpen} />
+      
+      <AlertDialog open={!!deleteRoomId} onOpenChange={(open) => !open && setDeleteRoomId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Room verwijderen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je deze room wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteRoomId && handleDeleteRoom(deleteRoomId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
