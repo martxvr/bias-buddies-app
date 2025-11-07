@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Home, Plus, LogIn, LogOut, Settings, Trash2, FolderKanban } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

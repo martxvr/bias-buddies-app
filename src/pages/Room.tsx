@@ -2,7 +2,7 @@ import BiasButton from "@/components/BiasButton";
 import { useMemo, useState, useEffect } from "react";
 import MuteToggle from "@/components/MuteToggle";
 import ChecklistDrawer from "@/components/ChecklistDrawer";
-import { ClipboardCheck, Copy, Check, ArrowLeft } from "lucide-react";
+import { ClipboardCheck, Copy, Check, MessageSquare } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,6 +10,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BiasVoting } from "@/components/BiasVoting";
 import { OnlineStatus } from "@/components/OnlineStatus";
+import { RoomChat } from "@/components/RoomChat";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Room = () => {
   const { roomId } = useParams();
@@ -23,6 +32,7 @@ const Room = () => {
   );
 
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [roomName, setRoomName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [copied, setCopied] = useState(false);
@@ -240,19 +250,42 @@ const Room = () => {
         </div>
       </div>
 
-      {/* Floating action buttons - always visible outside sidebar */}
+      {/* Floating action buttons */}
+      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <SheetTrigger asChild>
+          <button
+            aria-label="Open chat"
+            className="fixed bottom-4 right-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+          >
+            <MessageSquare className="h-5 w-5" />
+          </button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
+          <SheetHeader className="p-6 pb-4">
+            <SheetTitle>Room Chat</SheetTitle>
+            <SheetDescription>
+              Chatten met andere room members
+            </SheetDescription>
+          </SheetHeader>
+          <div className="h-[calc(100vh-8rem)] px-6 pb-6">
+            <RoomChat roomId={roomId!} />
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <button
         aria-label="Open trade checklist"
         onClick={() => setIsChecklistOpen(true)}
-        className="fixed bottom-4 right-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+        className="fixed bottom-20 right-4 z-[100] rounded-full border border-border/60 bg-background/60 p-3 text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
       >
         <ClipboardCheck className="h-5 w-5" />
       </button>
+      
       {isOwner && (
         <button
           aria-label="Reset biases to neutral"
           onClick={handleReset}
-          className="fixed bottom-20 right-4 z-[100] rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
+          className="fixed bottom-36 right-4 z-[100] rounded-full border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground/80 shadow-sm backdrop-blur transition-colors hover:text-foreground hover:bg-background/80 active:scale-95"
         >
           Reset
         </button>

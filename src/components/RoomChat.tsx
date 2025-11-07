@@ -17,7 +17,7 @@ interface Message {
   profiles?: {
     username: string;
     avatar_url?: string;
-  };
+  } | null;
 }
 
 interface RoomChatProps {
@@ -38,7 +38,7 @@ export const RoomChat = ({ roomId }: RoomChatProps) => {
         .from("room_messages")
         .select(`
           *,
-          profiles (username, avatar_url)
+          profiles!room_messages_user_id_fkey (username, avatar_url)
         `)
         .eq("room_id", roomId)
         .order("created_at", { ascending: true })
@@ -49,7 +49,7 @@ export const RoomChat = ({ roomId }: RoomChatProps) => {
         return;
       }
 
-      setMessages(data || []);
+      setMessages((data as any) || []);
     };
 
     loadMessages();
@@ -69,13 +69,13 @@ export const RoomChat = ({ roomId }: RoomChatProps) => {
             .from("room_messages")
             .select(`
               *,
-              profiles (username, avatar_url)
+              profiles!room_messages_user_id_fkey (username, avatar_url)
             `)
             .eq("id", payload.new.id)
             .single();
 
           if (data) {
-            setMessages((prev) => [...prev, data]);
+            setMessages((prev) => [...prev, data as any]);
           }
         }
       )
