@@ -114,12 +114,17 @@ const Room = () => {
     }
 
     try {
-      const { error } = await supabase.from("room_bias").upsert({
-        room_id: roomId,
-        timeframe,
-        bias_state: newBias,
-        updated_by: user?.id,
-      });
+      const { error } = await supabase.from("room_bias").upsert(
+        {
+          room_id: roomId,
+          timeframe,
+          bias_state: newBias,
+          updated_by: user?.id,
+        },
+        {
+          onConflict: "room_id,timeframe",
+        }
+      );
 
       if (error) throw error;
     } catch (error: any) {
@@ -162,11 +167,12 @@ const Room = () => {
       <div className="w-full max-w-5xl">
         <div className="mb-6 flex items-center justify-between">
           <MuteToggle />
-          <OnlineStatus roomId={roomId!} />
+          <div />
         </div>
         <div className="mb-12 text-center">
-          <h1 className="mb-2 text-4xl font-bold text-foreground">
+          <h1 className="mb-2 text-4xl font-bold text-foreground flex items-center justify-center gap-3">
             {roomName}
+            <OnlineStatus roomId={roomId!} />
           </h1>
           <p className="text-muted-foreground mb-4">
             {isOwner ? "You are the room owner" : "Shared trading bias tracker"}

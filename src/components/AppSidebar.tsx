@@ -142,28 +142,28 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <NavLink to="/" end>
+                    <button onClick={() => navigate("/")}>
                       <Home className="h-4 w-4" />
                       {!isCollapsed && <span>Home</span>}
-                    </NavLink>
+                    </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 {user && (
                   <>
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild>
-                        <NavLink to="/profile">
+                        <button onClick={() => navigate("/profile")}>
                           <User className="h-4 w-4" />
                           {!isCollapsed && <span>Profiel</span>}
-                        </NavLink>
+                        </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild>
-                        <NavLink to="/rooms">
+                        <button onClick={() => navigate("/rooms")}>
                           <FolderKanban className="h-4 w-4" />
                           {!isCollapsed && <span>Room Beheer</span>}
-                        </NavLink>
+                        </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </>
@@ -183,10 +183,13 @@ export function AppSidebar() {
                       <SidebarMenuItem key={room.id}>
                         <SidebarMenuButton asChild className="justify-between group">
                           <div className="flex items-center w-full">
-                            <NavLink to={`/room/${room.id}`} className="flex items-center gap-2 flex-1">
+                            <button 
+                              onClick={() => navigate(`/room/${room.id}`)} 
+                              className="flex items-center gap-2 flex-1"
+                            >
                               <Settings className="h-4 w-4" />
                               {!isCollapsed && <span>{room.name}</span>}
-                            </NavLink>
+                            </button>
                             {!isCollapsed && room.owner_id === user?.id && (
                               <button
                                 onClick={(e) => {

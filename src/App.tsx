@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Room from "./pages/Room";
@@ -27,7 +28,8 @@ const App = () => (
             <div className="flex-1 flex flex-col relative">
               <header className="h-12 flex items-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
                 <SidebarTrigger className="ml-2" />
-                <div className="ml-auto mr-4">
+                <div className="ml-auto mr-4 flex items-center gap-2">
+                  <ThemeToggle />
                   <NotificationCenter />
                 </div>
               </header>

@@ -51,6 +51,49 @@ All colors MUST be HSL.
     --neutral-foreground: 215 20% 65%;
     --neutral-hover: 220 15% 35%;
   }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    /* Trading colors */
+    --bullish: 142 76% 36%;
+    --bullish-foreground: 0 0% 100%;
+    --bullish-hover: 142 76% 32%;
+    
+    --bearish: 0 72% 51%;
+    --bearish-foreground: 0 0% 100%;
+    --bearish-hover: 0 72% 46%;
+    
+    --neutral: 220 15% 70%;
+    --neutral-foreground: 222.2 47.4% 11.2%;
+    --neutral-hover: 220 15% 65%;
+  }
 }
 
 @layer base {
