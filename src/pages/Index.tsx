@@ -1,6 +1,5 @@
 import BiasButton from "@/components/BiasButton";
 import { useMemo, useState } from "react";
-import MuteToggle from "@/components/MuteToggle";
 import ChecklistDrawer from "@/components/ChecklistDrawer";
 import { ClipboardCheck } from "lucide-react";
 
@@ -34,7 +33,6 @@ const Index = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-5xl">
-        <MuteToggle />
         <div className="mb-12 text-center">
           <h1 className="mb-2 text-4xl font-bold text-foreground">
             Trading Bias Tracker
