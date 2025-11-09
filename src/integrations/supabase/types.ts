@@ -14,6 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_value: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          name: string
+          requirement_value: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_value?: number
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      favorite_rooms: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -58,20 +163,29 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
+          favorite_bias: string | null
           id: string
+          updated_at: string | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          favorite_bias?: string | null
           id: string
+          updated_at?: string | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          favorite_bias?: string | null
           id?: string
+          updated_at?: string | null
           username?: string | null
         }
         Relationships: []
@@ -228,6 +342,39 @@ export type Database = {
           },
         ]
       }
+      room_sessions: {
+        Row: {
+          ended_at: string | null
+          id: string
+          long_term_bias: string | null
+          medium_term_bias: string | null
+          participants_count: number | null
+          room_id: string
+          short_term_bias: string | null
+          started_at: string
+        }
+        Insert: {
+          ended_at?: string | null
+          id?: string
+          long_term_bias?: string | null
+          medium_term_bias?: string | null
+          participants_count?: number | null
+          room_id: string
+          short_term_bias?: string | null
+          started_at?: string
+        }
+        Update: {
+          ended_at?: string | null
+          id?: string
+          long_term_bias?: string | null
+          medium_term_bias?: string | null
+          participants_count?: number | null
+          room_id?: string
+          short_term_bias?: string | null
+          started_at?: string
+        }
+        Relationships: []
+      }
       rooms: {
         Row: {
           created_at: string
@@ -259,6 +406,126 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scheduled_sessions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          notified: boolean | null
+          room_id: string
+          scheduled_for: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          notified?: boolean | null
+          room_id: string
+          scheduled_for: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          notified?: boolean | null
+          room_id?: string
+          scheduled_for?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          custom_theme: Json | null
+          id: string
+          notification_settings: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_theme?: Json | null
+          id?: string
+          notification_settings?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_theme?: Json | null
+          id?: string
+          notification_settings?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          created_at: string
+          current_streak: number | null
+          id: string
+          last_active_date: string | null
+          longest_streak: number | null
+          messages_sent: number | null
+          rooms_visited: number | null
+          total_votes: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number | null
+          messages_sent?: number | null
+          rooms_visited?: number | null
+          total_votes?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number | null
+          messages_sent?: number | null
+          rooms_visited?: number | null
+          total_votes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

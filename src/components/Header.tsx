@@ -5,7 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { CreateRoomDialog } from "./CreateRoomDialog";
 import { JoinRoomDialog } from "./JoinRoomDialog";
 import { Button } from "./ui/button";
-import { Home, User, LogIn, LogOut, FolderKanban, Volume2, VolumeX, Menu } from "lucide-react";
+import { Home, User, LogIn, LogOut, FolderKanban, Volume2, VolumeX, Menu, LayoutDashboard } from "lucide-react";
 import { NotificationCenter } from "./NotificationCenter";
 import {
   DropdownMenu,
@@ -51,6 +51,15 @@ export const Header = () => {
             
             {user && (
               <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate("/dashboard")}
+                  aria-label="Dashboard"
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                </Button>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" aria-label="Rooms">
@@ -103,6 +112,18 @@ export const Header = () => {
                   
                   {user && (
                     <>
+                      <Button
+                        variant="ghost"
+                        className="justify-start"
+                        onClick={() => {
+                          navigate("/dashboard");
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <LayoutDashboard className="h-5 w-5 mr-2" />
+                        Dashboard
+                      </Button>
+
                       <Button
                         variant="ghost"
                         className="justify-start"
