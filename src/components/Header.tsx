@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "./ThemeToggle";
 import { CreateRoomDialog } from "./CreateRoomDialog";
 import { JoinRoomDialog } from "./JoinRoomDialog";
+import { MyRoomsDialog } from "./MyRoomsDialog";
 import { Button } from "./ui/button";
 import { Home, User, LogIn, LogOut, FolderKanban, Volume2, VolumeX, Menu, LayoutDashboard } from "lucide-react";
 import { NotificationCenter } from "./NotificationCenter";
@@ -12,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -25,6 +27,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [joinRoomOpen, setJoinRoomOpen] = useState(false);
+  const [myRoomsOpen, setMyRoomsOpen] = useState(false);
   const [muted, setMutedState] = useState<boolean>(() => getMuted());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -67,6 +70,10 @@ export const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={() => setMyRoomsOpen(true)}>
+                      Mijn Rooms
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setCreateRoomOpen(true)}>
                       Create Room
                     </DropdownMenuItem>
@@ -122,6 +129,18 @@ export const Header = () => {
                       >
                         <LayoutDashboard className="h-5 w-5 mr-2" />
                         Dashboard
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        className="justify-start"
+                        onClick={() => {
+                          setMyRoomsOpen(true);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <FolderKanban className="h-5 w-5 mr-2" />
+                        Mijn Rooms
                       </Button>
 
                       <Button
@@ -206,6 +225,7 @@ export const Header = () => {
 
       <CreateRoomDialog open={createRoomOpen} onOpenChange={setCreateRoomOpen} />
       <JoinRoomDialog open={joinRoomOpen} onOpenChange={setJoinRoomOpen} />
+      <MyRoomsDialog open={myRoomsOpen} onOpenChange={setMyRoomsOpen} />
     </>
   );
 };
