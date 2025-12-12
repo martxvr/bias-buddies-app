@@ -382,6 +382,7 @@ export type Database = {
           invite_code: string
           name: string
           owner_id: string
+          timeframes: string[]
         }
         Insert: {
           created_at?: string
@@ -389,6 +390,7 @@ export type Database = {
           invite_code?: string
           name: string
           owner_id: string
+          timeframes?: string[]
         }
         Update: {
           created_at?: string
@@ -396,6 +398,7 @@ export type Database = {
           invite_code?: string
           name?: string
           owner_id?: string
+          timeframes?: string[]
         }
         Relationships: [
           {
