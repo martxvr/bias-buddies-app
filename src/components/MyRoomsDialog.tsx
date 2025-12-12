@@ -145,12 +145,13 @@ export function MyRoomsDialog({ open, onOpenChange }: MyRoomsDialogProps) {
                       <Copy className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="secondary"
+                      size="sm"
                       onClick={() => handleJoinRoom(room)}
-                      title="Join room"
+                      className="gap-1"
                     >
                       <LogIn className="h-4 w-4" />
+                      Open
                     </Button>
                     <Button
                       variant="ghost"
