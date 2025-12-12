@@ -8,17 +8,16 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { BiasVoting } from "@/components/BiasVoting";
 import { OnlineStatus } from "@/components/OnlineStatus";
+import { TimeframeManager } from "@/components/TimeframeManager";
 
 const Room = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const timeframes = ["1D", "4H", "1H", "15M", "5M"];
 
   type BiasState = "neutral" | "bullish" | "bearish";
-  const [biasByTimeframe, setBiasByTimeframe] = useState<Record<string, BiasState>>(
-    () => Object.fromEntries(timeframes.map((tf) => [tf, "neutral"]))
-  );
+  const [timeframes, setTimeframes] = useState<string[]>(["1D", "4H", "1H", "15M", "5M"]);
+  const [biasByTimeframe, setBiasByTimeframe] = useState<Record<string, BiasState>>({});
 
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [roomName, setRoomName] = useState("");
@@ -49,16 +48,20 @@ const Room = () => {
         return;
       }
 
+      const roomTimeframes = room.timeframes || ["1D", "4H", "1H", "15M", "5M"];
+      setTimeframes(roomTimeframes);
       setRoomName(room.name);
       setInviteCode(room.invite_code);
       setIsOwner(room.owner_id === user.id);
 
       const biasData: Record<string, BiasState> = Object.fromEntries(
-        timeframes.map((tf) => [tf, "neutral"])
+        roomTimeframes.map((tf: string) => [tf, "neutral"])
       );
       
       room.room_bias?.forEach((bias: any) => {
-        biasData[bias.timeframe] = bias.bias_state;
+        if (roomTimeframes.includes(bias.timeframe)) {
+          biasData[bias.timeframe] = bias.bias_state;
+        }
       });
 
       setBiasByTimeframe(biasData);
@@ -82,6 +85,26 @@ const Room = () => {
               ...prev,
               [payload.new.timeframe]: payload.new.bias_state,
             }));
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "rooms",
+          filter: `id=eq.${roomId}`,
+        },
+        (payload: any) => {
+          if (payload.new.timeframes) {
+            setTimeframes(payload.new.timeframes);
+            // Initialize new timeframes with neutral
+            const newBiasData: Record<string, BiasState> = {};
+            payload.new.timeframes.forEach((tf: string) => {
+              newBiasData[tf] = biasByTimeframe[tf] || "neutral";
+            });
+            setBiasByTimeframe(newBiasData);
           }
         }
       )
@@ -151,6 +174,30 @@ const Room = () => {
     }
   };
 
+  const handleTimeframesChange = async (newTimeframes: string[]) => {
+    try {
+      const { error } = await supabase
+        .from("rooms")
+        .update({ timeframes: newTimeframes })
+        .eq("id", roomId);
+
+      if (error) throw error;
+
+      setTimeframes(newTimeframes);
+      
+      // Initialize new timeframes with neutral bias
+      const newBiasData: Record<string, BiasState> = {};
+      newTimeframes.forEach((tf) => {
+        newBiasData[tf] = biasByTimeframe[tf] || "neutral";
+      });
+      setBiasByTimeframe(newBiasData);
+      
+      toast.success("Timeframes updated");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update timeframes");
+    }
+  };
+
   const copyInviteCode = () => {
     navigator.clipboard.writeText(inviteCode);
     setCopied(true);
@@ -168,9 +215,17 @@ const Room = () => {
             {roomName}
             <OnlineStatus roomId={roomId!} />
           </h1>
-          <p className="text-muted-foreground mb-4">
-            {isOwner ? "You are the room owner" : "Shared trading bias tracker"}
-          </p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <p className="text-muted-foreground">
+              {isOwner ? "You are the room owner" : "Shared trading bias tracker"}
+            </p>
+            {isOwner && (
+              <TimeframeManager
+                timeframes={timeframes}
+                onTimeframesChange={handleTimeframesChange}
+              />
+            )}
+          </div>
           <button
             onClick={copyInviteCode}
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background/60 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur transition-colors hover:bg-background/80 hover:text-foreground"
